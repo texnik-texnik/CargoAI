@@ -47,26 +47,33 @@ function doPost(e) {
     // 5. Обработка ФОТО (Admin ID или Анализ товара)
     if (msg.photo) {
        const photo = msg.photo[msg.photo.length - 1];
-       
+
        // Админ получает ID файла
        if (CONFIG.ADMIN_IDS.includes(userId)) {
           TG.sendMessage(chatId, `🆔 ID: <code>${photo.file_id}</code>`);
           return;
        }
-       
+
        // 📊 Логируем запрос AI Vision
-   logStats("AI_VISION", userId, msg.caption || "фото без подписи");
-       
-       // Пользователь получает анализ AI
+       logStats("AI_VISION", userId, msg.caption || "фото без подписи");
+
+       // Пользователь получает анализ AI (Groq Vision - FREE!)
        TG.send("sendChatAction", { chat_id: chatId, action: "typing" });
-       const analysis = askAiVision(photo.file_id, msg.caption, lang);
        
+       // Try Groq Vision first (FREE)
+       let analysis = askGroqVision(photo.file_id, msg.caption, lang);
+       
+       // Fallback to Gemini if Groq fails
+       if (!analysis) {
+         analysis = askAiVision(photo.file_id, msg.caption, lang);
+       }
+
        if (analysis) {
           TG.sendMessage(chatId, `🤖 <b>AI:</b>\n\n${analysis}`);
        } else {
           TG.sendMessage(chatId, lang === 'ru' ? "Ошибка анализа." : "Хатогӣ дар таҳлил.");
        }
-       return; 
+       return;
     }
     // ═══════════════════════════════════════════════════════════
     // 5.1. 🎙️ ОБРАБОТКА ГОЛОСОВЫХ СООБЩЕНИЙ
@@ -74,15 +81,16 @@ function doPost(e) {
     if (msg.voice) {
        // Показываем статус "печатает..."
        TG.send("sendChatAction", { chat_id: chatId, action: "typing" });
-       
+
        logStats("VOICE_MSG", userId, `${msg.voice.duration}s`);
-       
+
+       // Try Groq AI first (FREE!) - note: Groq doesn't support audio yet, use Gemini
        const voiceResponse = askAiVoice(msg.voice.file_id, lang);
-       
+
        if (voiceResponse) {
           TG.sendMessage(chatId, `🎙️ <b>AI:</b>\n\n${voiceResponse}`);
        } else {
-          const errMsg = lang === 'ru' 
+          const errMsg = lang === 'ru'
             ? "⚠️ Не удалось распознать голосовое сообщение. Попробуйте написать текстом или перезаписать аудио."
             : "⚠️ Овозро фаҳмида натавонистам. Лутфан, матн нависед ё аудиоро аз нав сабт кунед.";
           TG.sendMessage(chatId, errMsg);
@@ -256,7 +264,15 @@ function doPost(e) {
     if (text.length > 3) {
        TG.send("sendChatAction", { chat_id: chatId, action: "typing" });
        logStats("AI_TEXT", userId, text.substring(0, 50));
-       const aiAnswer = askAiText(text, lang);
+       
+       // Try Groq AI first (FREE! - 30 req/min, very fast)
+       let aiAnswer = askGroqAI(text, lang);
+       
+       // Fallback to Gemini if Groq fails (rate limit or error)
+       if (!aiAnswer) {
+         aiAnswer = askAiText(text, lang);
+       }
+       
        if (aiAnswer) {
           TG.sendMessage(chatId, aiAnswer);
        } else {
@@ -351,7 +367,13 @@ function handlePhotoMessage(msg, chatId, userId, lang) {
   logStats("AI_VISION", userId, msg.caption || "фото без подписи");
   TG.sendChatAction(chatId, "typing");
 
-  const analysis = askAiVision(photo.file_id, msg.caption, lang);
+  // Try Groq Vision first (FREE!)
+  let analysis = askGroqVision(photo.file_id, msg.caption, lang);
+  
+  // Fallback to Gemini if Groq fails
+  if (!analysis) {
+    analysis = askAiVision(photo.file_id, msg.caption, lang);
+  }
 
   if (analysis) {
     TG.sendMessage(chatId, `🤖 <b>AI:</b>\n\n${analysis}`);
@@ -625,7 +647,13 @@ function handleAIResponse(chatId, userId, text, L) {
   TG.sendChatAction(chatId, "typing");
   logStats("AI_TEXT", userId, text.substring(0, 50));
 
-  const answer = askAiText(text, L);
+  // Try Groq AI first (FREE! - 30 req/min)
+  let answer = askGroqAI(text, L);
+  
+  // Fallback to Gemini if Groq fails
+  if (!answer) {
+    answer = askAiText(text, L);
+  }
 
   if (answer) {
     TG.sendMessage(chatId, answer);
