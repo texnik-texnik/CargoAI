@@ -578,6 +578,48 @@
 
     /* Hidden */
     .hidden { display: none !important; }
+
+    /* AI Assistant Styles */
+    .ai-suggestion {
+      padding: 8px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text);
+    }
+    .ai-suggestion:active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: scale(0.95);
+    }
+    .ai-message {
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 12px;
+      max-width: 85%;
+    }
+    .ai-message.user {
+      background: var(--primary);
+      color: white;
+      margin-left: auto;
+    }
+    .ai-message.ai {
+      background: var(--bg);
+      color: var(--text);
+    }
+    .ai-message strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    .ai-message.loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
     
     /* Footer */
     .footer {
@@ -793,6 +835,7 @@
       <button class="tab active" data-filter="all">Все треки</button>
       <button class="tab" data-filter="found">На складе</button>
       <button class="tab" data-filter="pending">В пути</button>
+      <button class="tab" data-tab="ai">🤖 AI Помощник</button>
     </div>
 
     <!-- Track History Card -->
@@ -812,6 +855,52 @@
           <span class="material-icons">inbox</span>
           <p>История пуста</p>
           <p><small>Найдите трек через поиск</small></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Assistant Card (NEW) -->
+    <div class="card hidden" id="aiAssistantCard">
+      <div class="card-header">
+        <div class="icon">
+          <span class="material-icons">smart_toy</span>
+        </div>
+        <h2>🤖 AI Помощник</h2>
+      </div>
+      <div class="card-content">
+        <div id="aiChatMessages" style="max-height: 300px; overflow-y: auto; margin-bottom: 12px; padding: 8px;">
+          <div class="track-item" style="background: #F0F7FF; border-left: 3px solid var(--primary);">
+            <div class="track-body">
+              <strong>🤖 AI Помощник</strong>
+              <div style="margin-top: 6px; opacity: 0.9;">
+                Здравствуйте! Я AI-помощник Khuroson Cargo. Спросите меня о:<br><br>
+                • 📦 Тарифах и услугах<br>
+                • 📍 Адресах складов<br>
+                • 🚚 Процессе доставки<br>
+                • 📋 Правилах перевозки
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <input 
+            type="text" 
+            id="aiMessageInput" 
+            placeholder="Ваш вопрос..." 
+            style="flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px;"
+          />
+          <button 
+            id="aiSendBtn" 
+            style="padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 15px;"
+          >
+            <span class="material-icons">send</span>
+          </button>
+        </div>
+        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="ai-suggestion" data-question="Сколько стоит доставка?">💰 Тарифы</button>
+          <button class="ai-suggestion" data-question="Где находится ваш склад?">📍 Адреса</button>
+          <button class="ai-suggestion" data-question="Что запрещено к перевозке?">🚫 Запреты</button>
+          <button class="ai-suggestion" data-question="Как отследить груз?">📦 Трек</button>
         </div>
       </div>
     </div>
@@ -1187,10 +1276,96 @@
       tab.addEventListener('click', function() {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         this.classList.add('active');
-        currentFilter = this.dataset.filter;
-        renderTrackHistory(allTracks);
+        
+        // Handle AI Assistant tab
+        if (this.dataset.tab === 'ai') {
+          document.getElementById('trackHistory').closest('.card').classList.add('hidden');
+          document.getElementById('emptyState').closest('.card').classList.add('hidden');
+          document.getElementById('aiAssistantCard').classList.remove('hidden');
+        } else {
+          // Show track history
+          document.getElementById('trackHistory').closest('.card').classList.remove('hidden');
+          document.getElementById('aiAssistantCard').classList.add('hidden');
+          currentFilter = this.dataset.filter;
+          renderTrackHistory(allTracks);
+        }
       });
     });
+
+    // AI Assistant
+    const aiMessageInput = document.getElementById('aiMessageInput');
+    const aiSendBtn = document.getElementById('aiSendBtn');
+    const aiChatMessages = document.getElementById('aiChatMessages');
+
+    // AI suggestion buttons
+    document.querySelectorAll('.ai-suggestion').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const question = this.dataset.question;
+        aiMessageInput.value = question;
+        sendAIMessage(question);
+      });
+    });
+
+    // Send button
+    aiSendBtn.addEventListener('click', function() {
+      const message = aiMessageInput.value.trim();
+      if (message) {
+        sendAIMessage(message);
+      }
+    });
+
+    // Enter key
+    aiMessageInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const message = this.value.trim();
+        if (message) {
+          sendAIMessage(message);
+        }
+      }
+    });
+
+    function sendAIMessage(message) {
+      // Add user message to chat
+      addAIMessage(message, 'user');
+      aiMessageInput.value = '';
+
+      // Show loading
+      const loadingId = addAIMessage('Думаю...', 'ai', true);
+
+      // Call AI API
+      google.script.run
+        .withSuccessHandler(function(res) {
+          // Remove loading
+          const loadingEl = document.getElementById(loadingId);
+          if (loadingEl) loadingEl.remove();
+
+          if (res && res.success) {
+            addAIMessage(res.response, 'ai');
+          } else {
+            addAIMessage('Ошибка: ' + (res.error || 'Не удалось получить ответ'), 'ai');
+          }
+        })
+        .withFailureHandler(function(err) {
+          const loadingEl = document.getElementById(loadingId);
+          if (loadingEl) loadingEl.remove();
+          addAIMessage('Ошибка сервера: ' + err.message, 'ai');
+        })
+        .askAIAssistant({ userId: myUserId, message: message });
+    }
+
+    function addAIMessage(text, type, isLoading = false) {
+      const id = 'ai-msg-' + Date.now();
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = 'ai-message ' + type + (isLoading ? ' loading' : '');
+      div.innerHTML = `
+        <strong>${type === 'user' ? 'Вы' : '🤖 AI'}</strong>
+        ${text}
+      `;
+      aiChatMessages.appendChild(div);
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      return id;
+    }
 
     // Refresh
     document.getElementById('refreshBtn').addEventListener('click', function() {

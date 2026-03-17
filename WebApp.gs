@@ -50,22 +50,22 @@ function doGet(e) {
 function getUserDataForWebApp(userId) {
   try {
     const cleanUserId = sanitizeUserId(userId);
-    
+
     if (!cleanUserId) {
       return { success: false, error: "Неверный ID пользователя" };
     }
 
     const user = DB.getUser(cleanUserId);
-    
+
     if (!user) {
       return { success: false, error: "Пользователь не найден" };
     }
 
     // Get track history
-    const historyCodes = user.history 
-      ? String(user.history).split(",").filter(Boolean) 
+    const historyCodes = user.history
+      ? String(user.history).split(",").filter(Boolean)
       : [];
-    
+
     let tracks = [];
     if (historyCodes.length > 0) {
       tracks = SearchEngine.find(historyCodes);
@@ -79,10 +79,11 @@ function getUserDataForWebApp(userId) {
       user: {
         clientId: user.clientId,
         name: sanitizeHTML(user.name),
-        phone: sanitizeHTML(user.phone)
+        phone: sanitizeHTML(user.phone),
+        lang: user.lang || 'tj'
       },
       tracks: tracks,
-      statusCounts: statusCounts // NEW: Add status counts
+      statusCounts: statusCounts
     };
 
   } catch (error) {
@@ -188,6 +189,155 @@ function searchTrackFromWebApp(data) {
 
   } catch (error) {
     logErrorToSheet("WEB_APP", "searchTrack", error.toString());
+    return { success: false, error: error.message };
+  }
+}
+
+// ============================================================================
+// AI ASSISTANT API (NEW - Groq Powered)
+// ============================================================================
+
+/**
+ * AI Chat assistant for Web App (Groq AI - FREE!)
+ * @param {{userId: string, message: string}} data - Chat data
+ * @returns {{success: boolean, response?: string, error?: string}}
+ */
+function askAIAssistant(data) {
+  try {
+    const userId = sanitizeUserId(data.userId);
+    const message = String(data.message || "").trim();
+    
+    if (!userId) {
+      return { success: false, error: "Неверный ID пользователя" };
+    }
+    
+    if (!message) {
+      return { success: false, error: "Сообщение пустое" };
+    }
+    
+    // Get user language
+    const user = DB.getUser(userId);
+    const lang = user ? user.lang : 'tj';
+    
+    // Try Groq AI first (FREE!)
+    let response = askGroqAI(message, lang);
+    
+    // Fallback to Gemini if Groq fails
+    if (!response) {
+      response = askAiText(message, lang);
+    }
+    
+    if (!response) {
+      return { success: false, error: "AI не ответил" };
+    }
+    
+    return { success: true, response: response };
+    
+  } catch (error) {
+    logErrorToSheet("WEB_APP", "askAIAssistant", error.toString());
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * AI Track code extraction from image (Groq Vision - FREE!)
+ * @param {{userId: string, imageUrl: string}} data - Image data
+ * @returns {{success: boolean, code?: string, confidence?: number, note?: string, error?: string}}
+ */
+function extractTrackCodeFromImage(data) {
+  try {
+    const userId = sanitizeUserId(data.userId);
+    const imageUrl = String(data.imageUrl || "");
+    
+    if (!userId) {
+      return { success: false, error: "Неверный ID пользователя" };
+    }
+    
+    if (!imageUrl) {
+      return { success: false, error: "Изображение не предоставлено" };
+    }
+    
+    // For web app, we need to download image from URL first
+    // This is a simplified version - in production you'd handle actual file upload
+    const result = {
+      success: false,
+      error: "Загрузка изображений через Web App в разработке"
+    };
+    
+    return result;
+    
+  } catch (error) {
+    logErrorToSheet("WEB_APP", "extractTrackCode", error.toString());
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * AI Cargo classification from image description
+ * @param {{userId: string, description: string}} data - Cargo description
+ * @returns {{success: boolean, category?: string, allowed?: boolean, notes?: Array, error?: string}}
+ */
+function classifyCargoAI(data) {
+  try {
+    const userId = sanitizeUserId(data.userId);
+    const description = String(data.description || "").trim();
+    
+    if (!userId) {
+      return { success: false, error: "Неверный ID пользователя" };
+    }
+    
+    if (!description) {
+      return { success: false, error: "Описание пустое" };
+    }
+    
+    // Get user language
+    const user = DB.getUser(userId);
+    const lang = user ? user.lang : 'tj';
+    
+    // Use Groq AI to classify cargo
+    const prompt = `Классифицируй груз для транспортной компании.
+    
+Описание: ${description}
+
+Определи:
+1. Категория (одежда, электроника, запчасти, продукты, хрупкое, опасное)
+2. Можно ли перевозить (да/нет)
+3. Особые требования (упаковка, температура)
+
+Ответь JSON:
+{
+  "category": "категория",
+  "allowed": true/false,
+  "notes": ["заметка 1", "заметка 2"]
+}`;
+
+    // Try Groq AI first
+    let response = askGroqAI(prompt, lang);
+    
+    if (!response) {
+      response = askAiText(prompt, lang);
+    }
+    
+    if (!response) {
+      return { success: false, error: "AI не ответил" };
+    }
+    
+    // Try to parse JSON from response
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        success: true,
+        category: parsed.category,
+        allowed: parsed.allowed,
+        notes: parsed.notes
+      };
+    }
+    
+    return { success: true, category: "Не определено", allowed: true, notes: [response] };
+    
+  } catch (error) {
+    logErrorToSheet("WEB_APP", "classifyCargoAI", error.toString());
     return { success: false, error: error.message };
   }
 }
