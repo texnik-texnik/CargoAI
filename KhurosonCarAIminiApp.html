@@ -4,7 +4,14 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#007AFF">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Khuroson Cargo">
   <title>Khuroson Cargo</title>
+  <link rel="manifest" href="https://script.google.com/macros/s/AKfycbzqAFwxaT4NqPzl3lL3ZJxbB-eLnGXAMg7q6nYxpJqOefq_D_lUdj8rAWNs40SeZjPPbA/exec?manifest=true">
+  <link rel="apple-touch-icon" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+  <link rel="icon" href="https://www.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
   
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   
@@ -22,6 +29,34 @@
       --border: #D1D1D6;
       --shadow: 0 2px 10px rgba(0,0,0,0.06);
       --radius: 14px;
+    }
+
+    /* Dark Mode */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --card-bg: #1C1C1E;
+        --text: #FFFFFF;
+        --text-secondary: #98989D;
+        --border: #38383A;
+        --shadow: 0 2px 10px rgba(0,0,0,0.3);
+      }
+      .ptr-container {
+        background: linear-gradient(135deg, #1C1C1E, #000000);
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #2C2C2E 25%, #3A3A3C 50%, #2C2C2E 75%);
+      }
+    }
+
+    /* Manual dark mode class */
+    body.dark-mode {
+      --bg: #000000;
+      --card-bg: #1C1C1E;
+      --text: #FFFFFF;
+      --text-secondary: #98989D;
+      --border: #38383A;
+      --shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
     * { 
@@ -774,6 +809,93 @@
     .timeline-item.current .timeline-status {
       color: var(--primary);
     }
+
+    /* Statistics Dashboard */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      padding: 8px;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg);
+      border-radius: 12px;
+      transition: transform 0.2s;
+    }
+    .stat-item:active {
+      transform: scale(0.95);
+    }
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      color: white;
+    }
+    .stat-icon .material-icons {
+      font-size: 24px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    /* Dark Mode Toggle */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 32px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      background-color: var(--border);
+      transition: 0.3s;
+      border-radius: 32px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input:checked + .toggle-slider {
+      background-color: var(--primary);
+    }
+    input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
     
     /* Footer */
     .footer {
@@ -888,6 +1010,60 @@
 
     <!-- Status Overview Card (NEW - Like Tj0007cargo) -->
     <div class="card" id="statusCard" style="display: none;">
+
+    <!-- Statistics Dashboard Card (NEW) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <span class="material-icons">analytics</span>
+        </div>
+        <h2>📊 Ваша статистика</h2>
+      </div>
+      <div class="card-content">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #007AFF, #0056B3);">
+              <span class="material-icons">inventory_2</span>
+            </div>
+            <div class="stat-value" id="statTotalTracks">0</div>
+            <div class="stat-label">Всего треков</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #34C759, #28B446);">
+              <span class="material-icons">check_circle</span>
+            </div>
+            <div class="stat-value" id="statFoundTracks">0</div>
+            <div class="stat-label">Найдено</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #FF9500, #FF6B00);">
+              <span class="material-icons">hourglass_empty</span>
+            </div>
+            <div class="stat-value" id="statPendingTracks">0</div>
+            <div class="stat-label">В пути</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #AF52DE, #8E24AA);">
+              <span class="material-icons">local_shipping</span>
+            </div>
+            <div class="stat-value" id="statTotalWeight">0</div>
+            <div class="stat-label">Общий вес (кг)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Mode Toggle (NEW) -->
+    <div class="card" style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="material-icons" style="color: var(--text-secondary);">brightness_4</span>
+        <span style="font-size: 15px; font-weight: 500;">Тёмная тема</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
       <div class="card-header">
         <div class="icon">
           <span class="material-icons">local_shipping</span>
@@ -1155,6 +1331,9 @@
       if (data && data.success) {
         renderProfile(data.user);
         allTracks = data.tracks || [];
+
+        // NEW: Render statistics dashboard
+        renderStatisticsDashboard(data.tracks || []);
 
         // NEW: Use status counts from server
         if (data.statusCounts) {
@@ -1689,6 +1868,70 @@
       loader.style.display = 'none';
       dashboard.style.display = 'block';
     }
+
+    // Statistics Dashboard
+    function renderStatisticsDashboard(tracks) {
+      const total = tracks.length;
+      const found = tracks.filter(t => t.found).length;
+      const pending = tracks.filter(t => !t.found).length;
+      
+      // Calculate total weight
+      let totalWeight = 0;
+      tracks.forEach(track => {
+        if (track.found && track.weight) {
+          const weight = parseFloat(String(track.weight).replace(',', '.'));
+          if (!isNaN(weight)) {
+            totalWeight += weight;
+          }
+        }
+      });
+
+      // Animate numbers
+      animateValue('statTotalTracks', 0, total, 1000);
+      animateValue('statFoundTracks', 0, found, 1000);
+      animateValue('statPendingTracks', 0, pending, 1000);
+      animateValue('statTotalWeight', 0, Math.round(totalWeight), 1000);
+    }
+
+    // Animate value counter
+    function animateValue(id, start, end, duration) {
+      const obj = document.getElementById(id);
+      if (!obj) return;
+      
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        obj.innerHTML = value.toLocaleString('ru-RU');
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    
+    // Check for saved preference or system preference
+    const savedDarkMode = localStorage.getItem('darkMode');
+    const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedDarkMode === 'true' || (!savedDarkMode && systemDarkMode)) {
+      document.body.classList.add('dark-mode');
+      darkModeToggle.checked = true;
+    }
+
+    darkModeToggle.addEventListener('change', function() {
+      if (this.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'true');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'false');
+      }
+    });
 
     function showError(message) {
       loader.style.display = 'none';
