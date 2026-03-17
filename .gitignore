@@ -4,6 +4,12 @@
 .env
 *.log
 
+# Sensitive URLs and tokens
+.last_deploy_url.txt
+.webhook_url.txt
+*webhook*.txt
+*deploy*.txt
+
 # Sensitive files (API keys, tokens, credentials)
 oauth-credentials.json
 *.key
