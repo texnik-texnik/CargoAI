@@ -52,45 +52,34 @@ const DB = {
   },
 
   /**
-   * Get user by ID with caching
+   * Get user by ID with advanced caching
    * @param {string} id - User ID
    * @returns {User|null}
    */
   getUser: function(id) {
-    const cache = CacheService.getScriptCache();
-    const cacheKey = `user:${id}`;
-    
-    // Check cache first
-    const cached = cache.get(cacheKey);
-    if (cached) {
-      return JSON.parse(cached);
-    }
+    // Use advanced cache with UserCache wrapper
+    return UserCache.getOrFetch(id, function(userId) {
+      // Cache miss - fetch from database
+      const sheet = DB.getSheet();
+      const finder = sheet.getRange("A:A").createTextFinder(userId).matchEntireCell(true);
+      const rowCell = finder.findNext();
 
-    // Query database
-    const sheet = DB.getSheet();
-    const finder = sheet.getRange("A:A").createTextFinder(id).matchEntireCell(true);
-    const rowCell = finder.findNext();
-    
-    if (!rowCell) {
-      return null;
-    }
+      if (!rowCell) {
+        return null;
+      }
 
-    // Read all columns (1-7)
-    const row = sheet.getRange(rowCell.getRow(), 1, 1, 7).getValues()[0];
-    
-    /** @type {User} */
-    const userData = {
-      id: String(row[0]),
-      clientId: String(row[1] || ""),
-      name: String(row[2] || ""),
-      phone: String(row[3] || ""),
-      lang: String(row[4] || "tj"),
-      history: String(row[5] || "")
-    };
+      // Read all columns (1-7)
+      const row = sheet.getRange(rowCell.getRow(), 1, 1, 7).getValues()[0];
 
-    // Cache for 1 hour
-    cache.put(cacheKey, JSON.stringify(userData), CACHE_TTL_USER);
-    return userData;
+      return {
+        id: String(row[0]),
+        clientId: String(row[1] || ""),
+        name: String(row[2] || ""),
+        phone: String(row[3] || ""),
+        lang: String(row[4] || "tj"),
+        history: String(row[5] || "")
+      };
+    });
   },
 
   /**
@@ -192,13 +181,8 @@ const DB = {
     const cellValue = field === "phone" ? "'" + value : value;
     sheet.getRange(row, col).setValue(cellValue);
 
-    // Update cache
-    const cached = CacheService.getScriptCache().get(`user:${id}`);
-    if (cached) {
-      const userData = JSON.parse(cached);
-      userData[field] = value;
-      CacheService.getScriptCache().put(`user:${id}`, JSON.stringify(userData), CACHE_TTL_USER);
-    }
+    // Invalidate user cache (will be refreshed on next getUser)
+    UserCache.invalidate(id);
 
     return true;
   },
@@ -428,18 +412,56 @@ function countTrackStatuses(tracks) {
 
 const SearchEngine = {
   /**
-   * Find tracks by codes
+   * Find tracks by codes with advanced caching
    * @param {string[]} codes - Array of track codes to search
    * @returns {TrackResult[]}
    */
   find: function(codes) {
     if (!CONFIG.FOLDER_ID || codes.length === 0) {
-      return codes.map(code => ({ code, found: false, status: TRACK_STATUS.WAITING }));
+      return codes.map(code => ({ code, found: false, status: TRACK_STATUS.WAITING, fromCache: false }));
     }
 
+    // Try to get individual tracks from cache first
+    const results = [];
+    const needSearch = [];
+
+    codes.forEach(code => {
+      // Try track cache
+      const cached = TrackCache.get(code);
+      
+      if (cached) {
+        cached.fromCache = true;
+        results.push(cached);
+        CacheStats.hit('TRACK');
+      } else {
+        needSearch.push(code);
+        CacheStats.miss('TRACK');
+      }
+    });
+
+    // Search for tracks not in cache
+    if (needSearch.length > 0) {
+      const searchResults = this._searchTracks(needSearch);
+      
+      // Cache the results
+      TrackCache.putMultiple(searchResults);
+      
+      results.push(...searchResults);
+    }
+
+    return results;
+  },
+
+  /**
+   * Internal track search (without caching)
+   * @param {string[]} codes - Track codes
+   * @returns {TrackResult[]}
+   * @private
+   */
+  _searchTracks: function(codes) {
     // Get cached file IDs or scan folder
     let fileIds = this._getTrackFileIds();
-    
+
     /** @type {TrackResult[]} */
     const results = [];
     let notFound = [...codes];
@@ -447,38 +469,38 @@ const SearchEngine = {
     // Search through each spreadsheet
     for (const fileId of fileIds) {
       if (notFound.length === 0) break; // All found
-      
+
       try {
         const sheet = SpreadsheetApp.openById(fileId).getSheets()[0];
         const lastRow = sheet.getLastRow();
-        
+
         if (lastRow < 2) continue; // Empty sheet
 
         // Read all data at once for performance
         const data = this._readSheetData(sheet, lastRow);
-        
+
         // Search for remaining codes
         const stillNotFound = [];
-        
+
         for (const code of notFound) {
           const row = data.find(r => r.code === code);
-          
+
           if (row) {
             results.push({
               code: code,
               found: true,
               date: row.date,
               weight: row.weight,
-              status: determineTrackStatus(row), // NEW: Add status
-              notes: row.notes || '' // NEW: Add notes for status detection
+              status: determineTrackStatus(row),
+              notes: row.notes || ''
             });
           } else {
             stillNotFound.push(code);
           }
         }
-        
+
         notFound = stillNotFound;
-        
+
       } catch (error) {
         Logger.log(`SearchEngine: Error reading file ${fileId}: ${error.message}`);
       }
@@ -486,10 +508,10 @@ const SearchEngine = {
 
     // Mark remaining as not found
     notFound.forEach(code => {
-      results.push({ 
-        code, 
+      results.push({
+        code,
         found: false,
-        status: TRACK_STATUS.WAITING // NEW: Default status
+        status: TRACK_STATUS.WAITING
       });
     });
 
