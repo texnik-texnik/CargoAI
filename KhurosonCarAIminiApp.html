@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Khuroson Cargo</title>
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #007AFF;
+      --primary-dark: #0056B3;
+      --success: #34C759;
+      --warning: #FF9500;
+      --danger: #FF3B30;
+      --bg: #F2F2F7;
+      --card-bg: #FFFFFF;
+      --text: #1C1C1E;
+      --text-secondary: #8E8E93;
+      --border: #D1D1D6;
+      --shadow: 0 2px 10px rgba(0,0,0,0.06);
+      --radius: 14px;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 20px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .header .logo-icon {
+      font-size: 28px;
+    }
+    .header .subtitle {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    /* Container */
+    .container {
+      flex: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+      width: 100%;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #F0F0F0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-header h2 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+    }
+    .card-header .icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .card-header .icon .material-icons {
+      font-size: 18px;
+    }
+    .card-content {
+      padding: 20px;
+    }
+
+    /* Profile */
+    .profile-section {
+      margin-bottom: 20px;
+    }
+    .profile-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #F0F0F0;
+    }
+    .profile-row:last-child { border-bottom: none; }
+    .profile-label {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .profile-value {
+      font-weight: 600;
+      font-size: 15px;
+      text-align: right;
+    }
+    .client-id {
+      background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(0, 122, 255, 0.05));
+      color: var(--primary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 16px;
+      border: 1px solid rgba(0, 122, 255, 0.2);
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 15px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      background: var(--card-bg);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    }
+    .form-control::placeholder {
+      color: var(--text-secondary);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+    .btn-primary:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Search */
+    .search-wrapper {
+      position: relative;
+    }
+    .search-wrapper input {
+      padding-left: 46px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 24px;
+    }
+
+    /* Track List */
+    .track-list {
+      list-style: none;
+    }
+    .track-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #F0F0F0;
+      transition: background 0.2s;
+    }
+    .track-item:last-child { border-bottom: none; }
+    .track-item:hover {
+      background: #F9F9F9;
+      margin: 0 -20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      border-radius: 10px;
+    }
+    .track-code {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 16px;
+      letter-spacing: 0.3px;
+    }
+    .track-status {
+      text-align: right;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-found {
+      background: linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(52, 199, 89, 0.1));
+      color: var(--success);
+      border: 1px solid rgba(52, 199, 89, 0.3);
+    }
+    .status-not-found {
+      background: linear-gradient(135deg, rgba(255, 59, 48, 0.2), rgba(255, 59, 48, 0.1));
+      color: var(--danger);
+      border: 1px solid rgba(255, 59, 48, 0.3);
+    }
+    .status-pending {
+      background: linear-gradient(135deg, rgba(255, 149, 0, 0.2), rgba(255, 149, 0, 0.1));
+      color: var(--warning);
+      border: 1px solid rgba(255, 149, 0, 0.3);
+    }
+    .track-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      padding: 5px;
+    }
+    .tab {
+      flex: 1;
+      padding: 11px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+    }
+
+    /* Search Result */
+    .search-result {
+      margin-top: 16px;
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .search-result.success {
+      background: linear-gradient(135deg, rgba(52, 199, 89, 0.15), rgba(52, 199, 89, 0.05));
+      border: 1.5px solid rgba(52, 199, 89, 0.4);
+    }
+    .search-result.error {
+      background: linear-gradient(135deg, rgba(255, 59, 48, 0.15), rgba(255, 59, 48, 0.05));
+      border: 1.5px solid rgba(255, 59, 48, 0.4);
+    }
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .result-header .material-icons {
+      font-size: 26px;
+    }
+    .result-success .result-header { 
+      color: var(--success); 
+    }
+    .result-error .result-header { 
+      color: var(--danger); 
+    }
+    .result-body {
+      margin-left: 36px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .result-body div {
+      margin-bottom: 5px;
+    }
+    .result-body strong {
+      font-weight: 600;
+    }
+
+    /* Loader */
+    .loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.98);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #E5E5EA;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loader-text {
+      margin-top: 18px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Snackbar */
+    .snackbar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #323232;
+      color: white;
+      padding: 15px 24px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s;
+      max-width: 90%;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .snackbar.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .snackbar.success { 
+      background: linear-gradient(135deg, var(--success), #28B446); 
+    }
+    .snackbar.error { 
+      background: linear-gradient(135deg, var(--danger), #D32F2F); 
+    }
+
+    /* Error Panel */
+    .error-panel {
+      background: linear-gradient(135deg, rgba(255, 59, 48, 0.15), rgba(255, 59, 48, 0.05));
+      border: 1.5px solid rgba(255, 59, 48, 0.4);
+      color: var(--danger);
+      padding: 15px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--text-secondary);
+    }
+    .empty-state .material-icons {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+    .empty-state p {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .empty-state p small {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    /* Refresh Button */
+    .refresh-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      box-shadow: 0 4px 16px rgba(0, 122, 255, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      transition: all 0.2s;
+    }
+    .refresh-btn:active {
+      transform: scale(0.9);
+    }
+    .refresh-btn .material-icons {
+      font-size: 26px;
+    }
+
+    /* Track Counter */
+    .track-counter {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 6px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-left: auto;
+      box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
+    }
+
+    /* Status Grid (NEW) */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .status-grid:last-child {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px;
+      background: var(--bg);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .status-item:active {
+      transform: scale(0.95);
+      background: #E5E5EA;
+    }
+    .status-item:hover {
+      background: #E8E8ED;
+    }
+    .status-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      color: white;
+    }
+    .status-icon.waiting {
+      background: linear-gradient(135deg, #FF9500, #FF6B00);
+    }
+    .status-icon.received {
+      background: linear-gradient(135deg, #34C759, #28B446);
+    }
+    .status-icon.intransit {
+      background: linear-gradient(135deg, #007AFF, #0056B3);
+    }
+    .status-icon.border {
+      background: linear-gradient(135deg, #AF52DE, #8E24AA);
+    }
+    .status-icon.warehouse {
+      background: linear-gradient(135deg, #FF9500, #FF6B00);
+    }
+    .status-icon.payment {
+      background: linear-gradient(135deg, #34C759, #28B446);
+    }
+    .status-icon.order {
+      background: linear-gradient(135deg, #007AFF, #0056B3);
+    }
+    .status-icon.delivery {
+      background: linear-gradient(135deg, #AF52DE, #8E24AA);
+    }
+    .status-icon.delivered {
+      background: linear-gradient(135deg, #34C759, #28B446);
+    }
+    .status-count {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .status-count:empty {
+      display: none;
+    }
+    .status-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Hidden */
+    .hidden { display: none !important; }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      background: var(--card-bg);
+      border-top: 1px solid #E5E5EA;
+    }
+    .footer p {
+      margin: 3px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div id="loader" class="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Загрузка данных...</div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <span class="material-icons logo-icon">local_shipping</span>
+      Khuroson Cargo
+    </h1>
+    <div class="subtitle">Ваш надёжный партнёр в Китае и Таджикистане</div>
+  </div>
+
+  <!-- Container -->
+  <div class="container" id="dashboard" class="hidden">
+
+    <!-- Error Panel -->
+    <div id="errorPanel" class="error-panel hidden">
+      <span class="material-icons">error_outline</span>
+      <span id="errorText"></span>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <span class="material-icons">person</span>
+        </div>
+        <h2>Профиль клиента</h2>
+      </div>
+      <div class="card-content">
+        <div class="profile-section">
+          <div class="profile-row">
+            <span class="profile-label">Код клиента</span>
+            <span class="client-id" id="clientId">-</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Имя</span>
+            <span class="profile-value" id="displayName">-</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Телефон</span>
+            <span class="profile-value" id="displayPhone">-</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #F0F0F0;">
+          <div class="form-group">
+            <label for="userName">
+              <span class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">edit</span>
+              Изменить имя
+            </label>
+            <input type="text" id="userName" class="form-control" placeholder="Введите новое имя">
+          </div>
+          <div class="form-group">
+            <label for="userPhone">
+              <span class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px;">phone</span>
+              Изменить телефон
+            </label>
+            <input type="tel" id="userPhone" class="form-control" placeholder="+992...">
+          </div>
+          <button id="saveBtn" class="btn btn-primary">
+            <span class="material-icons">save</span>
+            Сохранить изменения
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Overview Card (NEW - Like Tj0007cargo) -->
+    <div class="card" id="statusCard" style="display: none;">
+      <div class="card-header">
+        <div class="icon">
+          <span class="material-icons">local_shipping</span>
+        </div>
+        <h2>Мои грузы</h2>
+        <span class="track-counter" id="totalTracks">0</span>
+      </div>
+      <div class="card-content">
+        <!-- China Section -->
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 20px;">🇨🇳</span>
+              <span style="font-weight: 600; font-size: 15px;">В Китае</span>
+            </div>
+            <a href="#" onclick="filterTracks('china'); return false;" style="color: var(--primary); font-size: 13px; text-decoration: none;">подробнее →</a>
+          </div>
+          <div class="status-grid">
+            <div class="status-item" onclick="filterTracks('waiting'); return false;">
+              <div class="status-icon waiting">
+                <span class="material-icons">schedule</span>
+              </div>
+              <div class="status-count" id="countWaiting">0</div>
+              <div class="status-label">ожидание</div>
+            </div>
+            <div class="status-item" onclick="filterTracks('received'); return false;">
+              <div class="status-icon received">
+                <span class="material-icons">home</span>
+              </div>
+              <div class="status-count" id="countReceived">0</div>
+              <div class="status-label">получен</div>
+            </div>
+            <div class="status-item" onclick="filterTracks('intransit'); return false;">
+              <div class="status-icon intransit">
+                <span class="material-icons">local_shipping</span>
+              </div>
+              <div class="status-count" id="countIntransit">0</div>
+              <div class="status-label">в пути</div>
+            </div>
+            <div class="status-item" onclick="filterTracks('border'); return false;">
+              <div class="status-icon border">
+                <span class="material-icons">road</span>
+              </div>
+              <div class="status-count" id="countBorder">0</div>
+              <div class="status-label">граница</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tajikistan Section -->
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 20px;">🇹🇯</span>
+              <span style="font-weight: 600; font-size: 15px;">В Таджикистане</span>
+            </div>
+            <a href="#" onclick="filterTracks('tj'); return false;" style="color: var(--primary); font-size: 13px; text-decoration: none;">подробнее →</a>
+          </div>
+          <div class="status-grid">
+            <div class="status-item" onclick="filterTracks('warehouse'); return false;">
+              <div class="status-icon warehouse">
+                <span class="material-icons">warehouse</span>
+              </div>
+              <div class="status-count" id="countWarehouse">0</div>
+              <div class="status-label">склад</div>
+            </div>
+            <div class="status-item" onclick="filterTracks('payment'); return false;">
+              <div class="status-icon payment">
+                <span class="material-icons">account_balance_wallet</span>
+              </div>
+              <div class="status-count" id="countPayment">0</div>
+              <div class="status-label">оплата</div>
+            </div>
+            <div class="status-item" onclick="filterTracks('order'); return false;">
+              <div class="status-icon order">
+                <span class="material-icons">shopping_cart</span>
+              </div>
+              <div class="status-count" id="countOrder">0</div>
+              <div class="status-label">заявка</div>
+            </div>
+            <div class="status-item" onclick="filterTracks('delivery'); return false;">
+              <div class="status-icon delivery">
+                <span class="material-icons">local_shipping</span>
+              </div>
+              <div class="status-count" id="countDelivery">0</div>
+              <div class="status-label">доставка</div>
+            </div>
+            <div class="status-item" onclick="filterTracks('delivered'); return false;">
+              <div class="status-icon delivered">
+                <span class="material-icons">check_circle</span>
+              </div>
+              <div class="status-count" id="countDelivered">0</div>
+              <div class="status-label">доставлен</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <span class="material-icons">search</span>
+        </div>
+        <h2>Поиск трека</h2>
+      </div>
+      <div class="card-content">
+        <div class="search-wrapper">
+          <span class="material-icons search-icon">search</span>
+          <input type="text" id="trackInput" class="form-control" placeholder="Введите трек-код (например: KHU-123)" style="padding-left: 46px;">
+        </div>
+        <button id="searchTrackBtn" class="btn btn-primary" style="margin-top: 14px;">
+          <span class="material-icons">search</span>
+          Найти трек
+        </button>
+        <div id="searchResult"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-filter="all">Все треки</button>
+      <button class="tab" data-filter="found">На складе</button>
+      <button class="tab" data-filter="pending">В пути</button>
+    </div>
+
+    <!-- Track History Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">
+          <span class="material-icons">inventory_2</span>
+        </div>
+        <h2>Мои треки</h2>
+        <span class="track-counter" id="trackCount">0</span>
+      </div>
+      <div class="card-content">
+        <ul id="trackHistory" class="track-list">
+          <!-- История будет вставлена сюда -->
+        </ul>
+        <div id="emptyState" class="empty-state hidden">
+          <span class="material-icons">inbox</span>
+          <p>История пуста</p>
+          <p><small>Найдите трек через поиск</small></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p><strong>Khuroson Cargo</strong></p>
+    <p>Ваш надёжный партнёр</p>
+    <p style="margin-top: 10px; opacity: 0.7;">© 2026 CargoPLUS</p>
+  </div>
+
+  <!-- Refresh Button -->
+  <button class="refresh-btn" id="refreshBtn">
+    <span class="material-icons">refresh</span>
+  </button>
+
+  <!-- Snackbar -->
+  <div id="snackbar" class="snackbar"></div>
+
+  <!-- Debug -->
+  <div id="debug" style="display: none;">ID: <?= userId ?></div>
+
+  <script>
+    const myUserId = "<?= userId ?>";
+    
+    // Elements
+    const loader = document.getElementById('loader');
+    const dashboard = document.getElementById('dashboard');
+    const errorPanel = document.getElementById('errorPanel');
+    const errorText = document.getElementById('errorText');
+    const snackbar = document.getElementById('snackbar');
+    const trackHistory = document.getElementById('trackHistory');
+    const emptyState = document.getElementById('emptyState');
+    const trackCount = document.getElementById('trackCount');
+    
+    let allTracks = [];
+    let currentFilter = 'all';
+
+    // Init
+    window.onload = function() {
+      if (!myUserId || myUserId === "ОШИБКА_ПОЛУЧЕНИЯ_ID") {
+        showError("Не удалось определить ID. Откройте заново из Telegram.");
+        return;
+      }
+      loadData();
+    };
+
+    function loadData() {
+      google.script.run
+        .withSuccessHandler(onDataLoaded)
+        .withFailureHandler(onDataError)
+        .getUserDataForWebApp(myUserId);
+    }
+
+    function onDataLoaded(data) {
+      if (data && data.success) {
+        renderProfile(data.user);
+        allTracks = data.tracks || [];
+        
+        // NEW: Use status counts from server
+        if (data.statusCounts) {
+          renderStatusOverview(data.statusCounts);
+        } else {
+          // Fallback to old method
+          renderTrackHistory(allTracks);
+        }
+        
+        showDashboard();
+      } else {
+        onDataError(data);
+      }
+    }
+
+    function onDataError(err) {
+      const message = err ? (err.error || err.message) : "Неизвестная ошибка";
+      showError(`Ошибка загрузки: ${message}`);
+    }
+
+    // Render
+    function renderProfile(user) {
+      document.getElementById('clientId').innerText = user.clientId || 'N/A';
+      document.getElementById('displayName').innerText = user.name || '-';
+      document.getElementById('displayPhone').innerText = user.phone || '-';
+      document.getElementById('userName').value = user.name || '';
+      document.getElementById('userPhone').value = user.phone || '';
+    }
+
+    function renderTrackHistory(tracks) {
+      trackHistory.innerHTML = '';
+
+      let filteredTracks = tracks;
+      if (currentFilter === 'found') {
+        filteredTracks = tracks.filter(t => t.found);
+      } else if (currentFilter === 'pending') {
+        filteredTracks = tracks.filter(t => !t.found);
+      }
+
+      trackCount.innerText = filteredTracks.length;
+
+      // Update status overview (NEW)
+      updateStatusOverview(tracks);
+
+      if (!filteredTracks || filteredTracks.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      filteredTracks.forEach(track => {
+        const li = document.createElement('li');
+        li.className = 'track-item';
+
+        // Get status info
+        const statusInfo = getStatusInfoLocal(track.status);
+        
+        let statusBadge, meta;
+        if (track.found) {
+          statusBadge = `<span class="status-badge status-found" style="background: linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(52, 199, 89, 0.1)); color: ${statusInfo.color}; border: 1px solid ${statusInfo.color}">
+            <span class="material-icons" style="font-size: 12px; vertical-align: middle; margin-right: 4px;">${statusInfo.icon}</span>
+            ${statusInfo.label}
+          </span>`;
+          meta = `<div class="track-meta">📅 ${track.date} · ⚖️ ${track.weight} кг</div>`;
+        } else {
+          statusBadge = `<span class="status-badge status-pending" style="background: linear-gradient(135deg, rgba(255, 149, 0, 0.2), rgba(255, 149, 0, 0.1)); color: #FF9500; border: 1px solid #FF9500">
+            <span class="material-icons" style="font-size: 12px; vertical-align: middle; margin-right: 4px;">schedule</span>
+            ожидание
+          </span>`;
+          meta = `<div class="track-meta">Ожидается прибытие</div>`;
+        }
+
+        li.innerHTML = `
+          <div>
+            <div class="track-code">${track.code}</div>
+            ${meta}
+          </div>
+          <div class="track-status">
+            ${statusBadge}
+          </div>
+        `;
+        trackHistory.appendChild(li);
+      });
+    }
+
+    // NEW: Get status info for display
+    function getStatusInfoLocal(statusCode) {
+      const statusMap = {
+        'waiting': { label: 'ожидание', icon: 'schedule', color: '#FF9500' },
+        'received': { label: 'получен', icon: 'home', color: '#34C759' },
+        'intransit': { label: 'в пути', icon: 'local_shipping', color: '#007AFF' },
+        'border': { label: 'граница', icon: 'road', color: '#AF52DE' },
+        'warehouse': { label: 'склад', icon: 'warehouse', color: '#FF9500' },
+        'payment': { label: 'оплата', icon: 'account_balance_wallet', color: '#34C759' },
+        'order': { label: 'заявка', icon: 'shopping_cart', color: '#007AFF' },
+        'delivery': { label: 'доставка', icon: 'local_shipping', color: '#AF52DE' },
+        'delivered': { label: 'доставлен', icon: 'check_circle', color: '#34C759' }
+      };
+      return statusMap[statusCode] || statusMap.waiting;
+    }
+
+    // NEW: Update status overview counters
+    function renderStatusOverview(statusCounts) {
+      const total = statusCounts.total || 0;
+      document.getElementById('totalTracks').innerText = total;
+
+      const china = statusCounts.china || {};
+      const tj = statusCounts.tajikistan || {};
+
+      // Update China counters
+      document.getElementById('countWaiting').innerText = china.waiting > 0 ? china.waiting : '';
+      document.getElementById('countReceived').innerText = china.received > 0 ? china.received : '';
+      document.getElementById('countIntransit').innerText = china.intransit > 0 ? china.intransit : '';
+      document.getElementById('countBorder').innerText = china.border > 0 ? china.border : '';
+
+      // Update Tajikistan counters
+      document.getElementById('countWarehouse').innerText = tj.warehouse > 0 ? tj.warehouse : '';
+      document.getElementById('countPayment').innerText = tj.payment > 0 ? tj.payment : '';
+      document.getElementById('countOrder').innerText = tj.order > 0 ? tj.order : '';
+      document.getElementById('countDelivery').innerText = tj.delivery > 0 ? tj.delivery : '';
+      document.getElementById('countDelivered').innerText = tj.delivered > 0 ? tj.delivered : '';
+
+      // Show/hide status card
+      const statusCard = document.getElementById('statusCard');
+      if (total > 0) {
+        statusCard.style.display = 'block';
+      } else {
+        statusCard.style.display = 'none';
+      }
+    }
+
+    // NEW: Update status overview counters (old function - keep for compatibility)
+    function updateStatusOverview(tracks) {
+      const total = tracks.length;
+      document.getElementById('totalTracks').innerText = total;
+
+      // Simple status distribution based on track data
+      // In real implementation, you'd have status field in track object
+      let waiting = 0, received = 0, intransit = 0, border = 0;
+      let warehouse = 0, payment = 0, order = 0, delivery = 0, delivered = 0;
+
+      tracks.forEach(track => {
+        if (track.found) {
+          // Found tracks = on warehouse
+          warehouse++;
+        } else {
+          // Not found = in China (waiting/in transit)
+          waiting++;
+        }
+      });
+
+      // Update counters
+      document.getElementById('countWaiting').innerText = waiting > 0 ? waiting : '';
+      document.getElementById('countReceived').innerText = received > 0 ? received : '';
+      document.getElementById('countIntransit').innerText = intransit > 0 ? intransit : '';
+      document.getElementById('countBorder').innerText = border > 0 ? border : '';
+      document.getElementById('countWarehouse').innerText = warehouse > 0 ? warehouse : '';
+      document.getElementById('countPayment').innerText = payment > 0 ? payment : '';
+      document.getElementById('countOrder').innerText = order > 0 ? order : '';
+      document.getElementById('countDelivery').innerText = delivery > 0 ? delivery : '';
+      document.getElementById('countDelivered').innerText = delivered > 0 ? delivered : '';
+
+      // Show/hide status card
+      const statusCard = document.getElementById('statusCard');
+      if (total > 0) {
+        statusCard.style.display = 'block';
+      } else {
+        statusCard.style.display = 'none';
+      }
+    }
+
+    // NEW: Filter tracks by status
+    function filterTracks(status) {
+      currentFilter = status;
+      
+      // Update tab styling
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      
+      let filteredTracks = allTracks;
+      
+      if (status === 'found') {
+        filteredTracks = allTracks.filter(t => t.found);
+      } else if (status === 'pending') {
+        filteredTracks = allTracks.filter(t => !t.found);
+      } else if (status === 'china') {
+        // All China statuses
+        filteredTracks = allTracks.filter(t => !t.found);
+      } else if (status === 'tj') {
+        // All Tajikistan statuses
+        filteredTracks = allTracks.filter(t => t.found);
+      } else if (['waiting', 'received', 'intransit', 'border'].includes(status)) {
+        // China specific statuses (for now, show all not found)
+        filteredTracks = allTracks.filter(t => !t.found);
+      } else if (['warehouse', 'payment', 'order', 'delivery', 'delivered'].includes(status)) {
+        // Tajikistan specific statuses (for now, show all found)
+        filteredTracks = allTracks.filter(t => t.found);
+      }
+
+      renderTrackHistory(filteredTracks);
+      
+      // Show snackbar
+      showSnackbar(`Фильтр: ${status}`, 'success');
+    }
+
+    function renderSearchResult(res) {
+      const div = document.getElementById('searchResult');
+      
+      if (res.found) {
+        div.innerHTML = `
+          <div class="search-result success">
+            <div class="result-header">
+              <span class="material-icons">check_circle</span>
+              <strong>Найден на складе</strong>
+            </div>
+            <div class="result-body">
+              <div><strong>Код:</strong> ${res.code}</div>
+              <div><strong>Дата прибытия:</strong> ${res.date}</div>
+              <div><strong>Вес:</strong> ${res.weight} кг</div>
+              <div><strong>Статус:</strong> Готов к выдаче</div>
+            </div>
+          </div>
+        `;
+      } else {
+        div.innerHTML = `
+          <div class="search-result error">
+            <div class="result-header">
+              <span class="material-icons">error</span>
+              <strong>Не найден</strong>
+            </div>
+            <div class="result-body">
+              <div>Трек <strong>${res.code}</strong> отсутствует в базе</div>
+              <div style="margin-top: 8px; opacity: 0.8;">Возможно, трек ещё не зарегистрирован</div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Handlers
+    document.getElementById("saveBtn").addEventListener("click", function() {
+      const btn = this;
+      const name = document.getElementById("userName").value.trim();
+      const phone = document.getElementById("userPhone").value.trim();
+
+      if (name.length < 2) {
+        showSnackbar("Введите имя (мин. 2 символа)", "error");
+        return;
+      }
+      if (phone.length < 8) {
+        showSnackbar("Введите корректный номер", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-icons">hourglass_empty</span> Сохранение...';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if(res && res.success) {
+            document.getElementById('displayName').innerText = name;
+            document.getElementById('displayPhone').innerText = phone;
+            showSnackbar("✅ Данные сохранены!", "success");
+          } else {
+            showSnackbar("Ошибка: " + (res.error || ''), "error");
+          }
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-icons">save</span> Сохранить изменения';
+        })
+        .withFailureHandler(function(err) {
+          showSnackbar("Ошибка сервера", "error");
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-icons">save</span> Сохранить изменения';
+        })
+        .updateProfileFromWebApp({ userId: myUserId, newName: name, newPhone: phone });
+    });
+
+    document.getElementById("searchTrackBtn").addEventListener("click", function() {
+      const btn = this;
+      const code = document.getElementById('trackInput').value.trim();
+      
+      if (code.length < 4) {
+        showSnackbar("Код слишком короткий", "error");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-icons">hourglass_empty</span> Поиск...';
+      document.getElementById('searchResult').innerHTML = '';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res.success) {
+            renderSearchResult(res.result);
+            if (res.result.found) {
+              loadData();
+            }
+          } else {
+            showSnackbar("Ошибка поиска", "error");
+          }
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-icons">search</span> Найти трек';
+        })
+        .withFailureHandler(function(err) {
+          showSnackbar("Ошибка: " + err.message, "error");
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-icons">search</span> Найти трек';
+        })
+        .searchTrackFromWebApp({ userId: myUserId, code: code });
+    });
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.dataset.filter;
+        renderTrackHistory(allTracks);
+      });
+    });
+
+    // Refresh
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+      const icon = this.querySelector('.material-icons');
+      icon.style.transform = 'rotate(360deg)';
+      icon.style.transition = 'transform 0.5s';
+      setTimeout(() => { 
+        icon.style.transform = ''; 
+      }, 500);
+      loadData();
+      showSnackbar("🔄 Обновление...", "success");
+    });
+
+    // Utils
+    function showDashboard() {
+      loader.style.display = 'none';
+      dashboard.style.display = 'block';
+    }
+
+    function showError(message) {
+      loader.style.display = 'none';
+      errorText.innerText = message;
+      errorPanel.classList.remove('hidden');
+    }
+
+    function showSnackbar(message, type = '') {
+      snackbar.innerText = message;
+      snackbar.className = 'snackbar show ' + type;
+      setTimeout(() => {
+        snackbar.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

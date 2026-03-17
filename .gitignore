@@ -1,0 +1,55 @@
+# Google Apps Script / Clasp
+.claspignore
+.clasp.json
+.env
+*.log
+
+# Sensitive files (API keys, tokens, credentials)
+oauth-credentials.json
+*.key
+*.pem
+secrets.json
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.svg
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (if using local build)
+node_modules/
+package-lock.json
+
+# Build artifacts
+dist/
+build/
+
+# Test outputs
+coverage/
+.nyc_output/
+
+# Local configuration (keep example files)
+*.local
+.local.*
+
+# gas-fakes cache
+/tmp/gas-fakes/
+
+# Telegram session files
+*.session
