@@ -225,7 +225,7 @@ function doPost(e) {
             case L.menu[3][0]: // Профиль
         const displayPhone = String(user.phone || '');
         // ВАЖНО: Вставь сюда свой Web App URL от Google Deploy (заканчивается на /exec)
-        const webAppUrl = "https://script.google.com/macros/s/AKfycbzqAFwxaT4NqPzl3lL3ZJxbB-eLnGXAMg7q6nYxpJqOefq_D_lUdj8rAWNs40SeZjPPbA/exec"; 
+        const webAppUrl = CONFIG.WEBAPP_URL; 
         // 🚀 МАГИЯ: Приклеиваем ID юзера прямо к ссылке!
                 const finalUrl = webAppUrl + "?uid=" + user.id;
         
