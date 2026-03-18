@@ -15,11 +15,31 @@
  * @param {string} userId
  */
 function showAdminPanel(chatId, userId) {
-  const webAppUrl = doGetAdminPanel({ parameter: { uid: userId } }).getUrl();
+  // Get the deployment URL
+  const scriptId = ScriptApp.getScriptId();
+  const deployments = ScriptApp.getDeployments();
+  
+  let webAppUrl = '';
+  
+  // Find the latest web app deployment
+  for (const deployment of deployments) {
+    if (deployment.deploymentType === ScriptApp.DeploymentType.WEB_APP) {
+      webAppUrl = deployment.deploymentConfig.webAppConfig.url;
+      break;
+    }
+  }
+  
+  // If no deployment found, construct default URL
+  if (!webAppUrl) {
+    webAppUrl = `https://script.google.com/macros/s/${scriptId}/exec`;
+  }
+  
+  // Add user ID parameter
+  const adminUrl = `${webAppUrl}?uid=${userId}`;
   
   const keyboard = {
     inline_keyboard: [[
-      { text: "🔧 Открыть Админ Панель", url: webAppUrl }
+      { text: "🔧 Открыть Админ Панель", url: adminUrl }
     ]]
   };
   
