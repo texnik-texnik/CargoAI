@@ -55,8 +55,20 @@ function bulkUpdateStatus(userId, command) {
     const startDate = parseDate(dates[0]);
     const endDate = parseDate(dates[1]);
     
-    if (!startDate || !endDate) {
-      return { success: false, error: "Invalid date format. Use: DD.MM.YYYY" };
+    Logger.log(`Start date: ${dates[0]} -> ${startDate}`);
+    Logger.log(`End date: ${dates[1]} -> ${endDate}`);
+    
+    if (!startDate) {
+      return { success: false, error: `Invalid start date: ${dates[0]}. Use: DD.MM.YYYY` };
+    }
+    
+    if (!endDate) {
+      return { success: false, error: `Invalid end date: ${dates[1]}. Use: DD.MM.YYYY` };
+    }
+    
+    // Check if start date is before end date
+    if (startDate > endDate) {
+      return { success: false, error: `Start date (${dates[0]}) must be before end date (${dates[1]})` };
     }
     
     // Validate status
@@ -68,17 +80,27 @@ function bulkUpdateStatus(userId, command) {
     // Get all track files
     const fileIds = getTrackFileIds();
     
+    Logger.log(`Found ${fileIds.length} track files`);
+    
     let updatedCount = 0;
     let totalProcessed = 0;
+    let notFoundCount = 0;
     
     // Process each file
     for (const fileId of fileIds) {
       try {
+        Logger.log(`Processing file: ${fileId}`);
+        
         const ss = SpreadsheetApp.openById(fileId);
         const sheet = ss.getSheets()[0];
         const lastRow = sheet.getLastRow();
         
-        if (lastRow < 2) continue; // Empty sheet
+        Logger.log(`Sheet has ${lastRow} rows`);
+        
+        if (lastRow < 2) {
+          Logger.log('Empty sheet, skipping');
+          continue; // Empty sheet
+        }
         
         // Read all data
         const data = sheet.getRange(1, 1, lastRow, sheet.getLastColumn()).getValues();
@@ -113,12 +135,17 @@ function bulkUpdateStatus(userId, command) {
               // Update existing
               sheet.getRange(i + 1, statusColIndex).setValue(newStatus);
             }
-            
+
             updatedCount++;
+            Logger.log(`Updated row ${i + 1} to ${newStatus}`);
+          } else {
+            notFoundCount++;
           }
-          
+
           totalProcessed++;
         }
+        
+        Logger.log(`Processed ${totalProcessed} rows, updated ${updatedCount}`);
         
       } catch (error) {
         Logger.log(`Error processing file ${fileId}: ${error.message}`);
@@ -126,12 +153,13 @@ function bulkUpdateStatus(userId, command) {
     }
     
     // Log the update
-    logAdminAction(userId, `BULK_UPDATE: ${command}`, `Updated ${updatedCount} tracks`);
+    Logger.log(`Update complete: ${updatedCount} updated, ${notFoundCount} not found, ${totalProcessed} total processed`);
+    logAdminAction(userId, `BULK_UPDATE: ${command}`, `Updated ${updatedCount} tracks from ${totalProcessed} processed`);
     
     return {
       success: true,
       updated: updatedCount,
-      message: `Updated ${updatedCount} tracks from ${totalProcessed} processed`
+      message: `Updated ${updatedCount} tracks from ${totalProcessed} processed. Not found: ${notFoundCount}`
     };
     
   } catch (error) {
@@ -153,14 +181,44 @@ function parseDate(dateStr) {
   if (!dateStr) return null;
   
   try {
-    const parts = String(dateStr).split('.');
-    if (parts.length !== 3) return null;
+    // Convert to string and trim
+    const str = String(dateStr).trim();
     
-    const day = parseInt(parts[0], 10);
-    const month = parseInt(parts[1], 10) - 1; // JS months are 0-11
-    const year = parseInt(parts[2], 10);
+    // Try DD.MM.YYYY format
+    if (str.includes('.')) {
+      const parts = str.split('.');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // JS months are 0-11
+        const year = parseInt(parts[2], 10);
+        
+        if (day >= 1 && day <= 31 && month >= 0 && month <= 11 && year >= 2020) {
+          return new Date(year, month, day);
+        }
+      }
+    }
     
-    return new Date(year, month, day);
+    // Try YYYY-MM-DD format (ISO)
+    if (str.includes('-')) {
+      const parts = str.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        
+        if (day >= 1 && day <= 31 && month >= 0 && month <= 11 && year >= 2020) {
+          return new Date(year, month, day);
+        }
+      }
+    }
+    
+    // Try to parse as Date object directly
+    const date = new Date(str);
+    if (!isNaN(date.getTime()) && date.getFullYear() >= 2020) {
+      return date;
+    }
+    
+    return null;
   } catch (e) {
     return null;
   }
