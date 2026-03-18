@@ -260,6 +260,25 @@ function doPost(e) {
       return ContentService.createTextOutput("OK");
     }
 
+    // 🔧 АДМИН ПАНЕЛЬ (только для админов)
+    if (text === "/admin" && CONFIG.ADMIN_IDS.includes(userId)) {
+      showAdminPanel(chatId, userId);
+      return;
+    }
+
+    // 📊 ГРУППОВОЕ ОБНОВЛЕНИЕ (только для админов)
+    if (text.startsWith("/bulk ") && CONFIG.ADMIN_IDS.includes(userId)) {
+      const command = text.replace("/bulk ", "").trim();
+      handleBulkUpdate(chatId, userId, command);
+      return;
+    }
+
+    // 👤 ПОЛУЧИТЬ ID (для всех)
+    if (text === "/id") {
+      TG.sendMessage(chatId, `🆔 <b>Ваш ID:</b> <code>${userId}</code>\n\nСкопируйте и добавьте в Script Properties → ADMIN_IDS`);
+      return;
+    }
+
     // 8. 🤖 AI ОТВЕТ (Если это просто текст)
     if (text.length > 3) {
        TG.send("sendChatAction", { chat_id: chatId, action: "typing" });
