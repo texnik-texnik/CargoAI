@@ -15,31 +15,25 @@
  * @param {string} userId
  */
 function showAdminPanel(chatId, userId) {
-  // Get the deployment URL
-  const scriptId = ScriptApp.getScriptId();
-  const deployments = ScriptApp.getDeployments();
+  // Get URL from Script Properties
+  const adminPanelUrl = CONFIG.ADMINPANEL_URL;
   
-  let webAppUrl = '';
-  
-  // Find the latest web app deployment
-  for (const deployment of deployments) {
-    if (deployment.deploymentType === ScriptApp.DeploymentType.WEB_APP) {
-      webAppUrl = deployment.deploymentConfig.webAppConfig.url;
-      break;
-    }
-  }
-  
-  // If no deployment found, construct default URL
-  if (!webAppUrl) {
-    webAppUrl = `https://script.google.com/macros/s/${scriptId}/exec`;
+  if (!adminPanelUrl) {
+    TG.sendMessage(chatId, 
+      `❌ <b>Ошибка!</b>\n\n` +
+      `ADMINPANEL_URL не настроен!\n\n` +
+      `Добавьте в Script Properties:\n` +
+      `<code>ADMINPANEL_URL=https://script.google.com/.../exec</code>`
+    );
+    return;
   }
   
   // Add user ID parameter
-  const adminUrl = `${webAppUrl}?uid=${userId}`;
+  const fullUrl = `${adminPanelUrl}?uid=${userId}`;
   
   const keyboard = {
     inline_keyboard: [[
-      { text: "🔧 Открыть Админ Панель", url: adminUrl }
+      { text: "🔧 Открыть Админ Панель", url: fullUrl }
     ]]
   };
   

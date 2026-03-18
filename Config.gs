@@ -72,6 +72,7 @@ const CONFIG = {
   ADMIN_IDS: (PROPS.getProperty("ADMIN_IDS") || "").split(",").map(id => id.trim()).filter(Boolean),
   ADMIN_LINK: PROPS.getProperty("ADMIN_LINK") || "https://t.me/username",
   WEBAPP_URL: PROPS.getProperty("WEBAPP_URL") || "",
+  ADMINPANEL_URL: PROPS.getProperty("ADMINPANEL_URL") || "",
   SHEET_ID: PROPS.getProperty("USERS_SPREADSHEET_ID"),
   FOLDER_ID: PROPS.getProperty("TRACKS_FOLDER_ID"),
   PRICE_KG: PROPS.getProperty("PRICE_KG") || "25 сомонӣ",
