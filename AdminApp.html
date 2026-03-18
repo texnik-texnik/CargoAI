@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khuroson Cargo - Admin Panel</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #007AFF;
+      --success: #34C759;
+      --warning: #FF9500;
+      --danger: #FF3B30;
+      --bg: #F2F2F7;
+      --card-bg: #FFFFFF;
+      --text: #1C1C1E;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary), #0056B3);
+      color: white;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    .stat-item {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #8E8E93;
+      margin-top: 4px;
+    }
+    
+    .form-group {
+      margin-bottom: 16px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #D1D1D6;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+    
+    .btn:active { opacity: 0.8; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .btn-success { background: var(--success); }
+    .btn-warning { background: var(--warning); }
+    .btn-danger { background: var(--danger); }
+    
+    .result-box {
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 10px;
+      margin-top: 16px;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+    
+    .result-box.success { border-left: 4px solid var(--success); }
+    .result-box.error { border-left: 4px solid var(--danger); }
+    
+    .help-text {
+      font-size: 12px;
+      color: #8E8E93;
+      margin-top: 4px;
+    }
+    
+    .example {
+      background: #E8F4FD;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔧 Admin Panel</h1>
+    <p>Khuroson Cargo - Управление треками</p>
+  </div>
+  
+  <!-- Statistics -->
+  <div class="card">
+    <h2><span class="material-icons">analytics</span> Статистика</h2>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" id="statFiles">-</div>
+        <div class="stat-label">Файлов</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statTracks">-</div>
+        <div class="stat-label">Треков</div>
+      </div>
+    </div>
+    <button class="btn" onclick="loadStats()" style="margin-top: 12px;">
+      <span class="material-icons">refresh</span> Обновить
+    </button>
+  </div>
+  
+  <!-- Bulk Status Update -->
+  <div class="card">
+    <h2><span class="material-icons">swap_horiz</span> Групповое Обновление</h2>
+    
+    <div class="form-group">
+      <label>Формат Команды:</label>
+      <div class="example">
+        19.03.2026_18.03.2026-received
+      </div>
+      <div class="help-text">
+        Формат: <code>DD.MM.YYYY_DD.MM.YYYY-status</code>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Дата От:</label>
+      <input type="date" id="startDate">
+    </div>
+    
+    <div class="form-group">
+      <label>Дата До:</label>
+      <input type="date" id="endDate">
+    </div>
+    
+    <div class="form-group">
+      <label>Новый Статус:</label>
+      <select id="newStatus">
+        <option value="waiting">⏳ Ожидается</option>
+        <option value="received">✅ Принят на склад</option>
+        <option value="intransit">🚚 В пути</option>
+        <option value="border">👮 На таможне</option>
+        <option value="warehouse">🏭 На складе</option>
+        <option value="payment">💰 Оплачен</option>
+        <option value="delivered">🎉 Выдан</option>
+      </select>
+    </div>
+    
+    <button class="btn btn-warning" onclick="bulkUpdate()" id="updateBtn">
+      <span class="material-icons">update</span> Обновить Треки
+    </button>
+    
+    <div id="updateResult" class="result-box hidden"></div>
+  </div>
+  
+  <!-- Manual Command -->
+  <div class="card">
+    <h2><span class="material-icons">terminal</span> Ручная Команда</h2>
+    
+    <div class="form-group">
+      <label>Команда:</label>
+      <textarea id="manualCommand" placeholder="19.03.2026_18.03.2026-received"></textarea>
+      <div class="help-text">
+        Введите команду в формате: DD.MM.YYYY_DD.MM.YYYY-status
+      </div>
+    </div>
+    
+    <button class="btn btn-success" onclick="runManualCommand()" id="runBtn">
+      <span class="material-icons">play_arrow</span> Выполнить
+    </button>
+    
+    <div id="manualResult" class="result-box hidden"></div>
+  </div>
+  
+  <script>
+    const myUserId = "<?= userId ?>";
+    
+    // Load stats on init
+    window.onload = function() {
+      loadStats();
+      
+      // Set default dates (yesterday and today)
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      document.getElementById('startDate').valueAsDate = yesterday;
+      document.getElementById('endDate').valueAsDate = today;
+    };
+    
+    // Load statistics
+    function loadStats() {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            document.getElementById('statFiles').innerText = res.stats.totalFiles;
+            document.getElementById('statTracks').innerText = res.stats.totalTracks;
+          }
+        })
+        .getAdminStats(myUserId);
+    }
+    
+    // Bulk update
+    function bulkUpdate() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const status = document.getElementById('newStatus').value;
+      
+      if (!startDate || !endDate) {
+        showResult('updateResult', '❌ Выберите даты', 'error');
+        return;
+      }
+      
+      // Format: DD.MM.YYYY_DD.MM.YYYY-status
+      const command = `${startDate}_${endDate}-${status}`;
+      
+      executeCommand(command, 'updateResult', 'updateBtn');
+    }
+    
+    // Manual command
+    function runManualCommand() {
+      const command = document.getElementById('manualCommand').value.trim();
+      
+      if (!command) {
+        showResult('manualResult', '❌ Введите команду', 'error');
+        return;
+      }
+      
+      executeCommand(command, 'manualResult', 'runBtn');
+    }
+    
+    // Execute command
+    function executeCommand(command, resultId, btnId) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-icons">hourglass_empty</span> Обработка...';
+      
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          
+          if (res.success) {
+            showResult(resultId, `✅ ${res.message || `Обновлено: ${res.updated}`}`, 'success');
+          } else {
+            showResult(resultId, `❌ ${res.error}`, 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          showResult(resultId, `❌ Ошибка: ${err.message}`, 'error');
+        })
+        .bulkUpdateStatus(myUserId, command);
+    }
+    
+    // Show result
+    function showResult(elementId, message, type) {
+      const el = document.getElementById(elementId);
+      el.innerText = message;
+      el.className = `result-box ${type}`;
+      el.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
